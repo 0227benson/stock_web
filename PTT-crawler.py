@@ -5,54 +5,70 @@ from datetime import datetime,timedelta
 from random import random
 
 
-def crawl_page(page_url):
+def crawl_page_detail(detail_url, session):
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     }
 
-    re = requests.get(page_url, headers=header)
-    soup = BeautifulSoup(re.text, 'html.parser')
+    re = session.get(detail_url, headers=header)
+    soup = BeautifulSoup(re.text, 'lxml')
 
-    # 處理頁面的爬取邏輯
+    # 處理詳細頁面的爬取邏輯
     return soup
 def ptt_crawler(financial_dict,stock):
     # 設定爬取的起始日期（半年前的日期）
     start_date = (datetime.now() - timedelta(days=180)).replace(hour=0, minute=0, second=0, microsecond=0)
 
-    # 解析 PTT 目前最新的頁面，提取頁面數字
-    #latest_page_url = 'https://www.ptt.cc/bbs/Stock/index.html'
-    #latest_page_soup = crawl_page(latest_page_url)
-    #latest_page_number = latest_page_soup.select('.btn-group-paging a')[1]['href'].split('/')[-1].split('.')[0]
-    #latest_page_number = int(latest_page_number[5:])
-
-
-
     # 根據字典裡的股票代號或股票名稱爬取相對應的討論版標題
     id = financial_dict['stock_id']
     name = financial_dict['stock_name']
-    result_lst = [] # 爬取完的日期及標題
+    date_lst = [] # 爬取完的日期
+    title_lst = []
 
+    # 使用 Session 保持相同的 cookies
+    session = requests.Session()
+
+    # 設定起始頁面數字
+    page_number = 1
+    check = True
     while True:
-        # 設定起始頁面數字
-        page_number = 1
         first_page_url = f"https://www.ptt.cc/bbs/Stock/search?page={page_number}&q={stock}"
-        soup = crawl_page(first_page_url)
+        soup = crawl_page_detail(first_page_url, session)
 
         # 處理每一頁的內容，提取需要的資訊
         for i in soup.find_all('div', {'class': 'r-ent'}):
             date = i.find('div', {'class': 'meta'}).find('div', {'class': 'date'}).text
-            title = i.find('div', {'class': 'title'}).text.strip()
-            dt = date + title
-            result_lst.append(dt) #符合條件的標題存進list裡
+            title = i.find('div', {'class': 'title'})
 
+            # 提取標題的超連結
+            link = title.find('a')
+            detail_url = f"https://www.ptt.cc{link['href']}"
+
+            # 進入詳細頁面爬取更多資訊
+            detail_soup = crawl_page_detail(detail_url, session)
+
+            for meta_line in detail_soup.find_all('div', {'class': 'article-metaline'}):
+                if '時間' in meta_line.find('span', {'class': 'article-meta-tag'}).text:
+                    # 獲取發文的年份
+                    post_year = meta_line.find('span', {'class': 'article-meta-value'}).text.split()[-1]
+            end = date.split('/')
+
+            # 判斷是否符合條件
+            if int(post_year) == int(start_date.strftime('%Y')) and int(end[0]) >= int(start_date.strftime('%m')):
+                date_lst.append(date)
+                title_lst.append(title.text.strip())  # 符合條件的標題存進list裡
+            else:
+                check = False
+                break
+        if check == False:
+            break
         # 更新頁面數字，以繼續爬取下一頁
         page_number += 1
-        end = date.split('/')
-        # 設定爬取頁面的結束條件
-        if int(end[0]) == int(start_date.strftime('%m')) and int(end[1]) < int(start_date.strftime('%d')):
-            break
 
         # 避免爬取速度過快
         sleep(random() * 2)
 
-    print(result_lst)
+    if not date_lst or not title_lst:
+        print('此股票半年內無人討論')
+    else:
+        print(date_lst,title_lst,sep = '\n')

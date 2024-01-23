@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 from time import sleep
 from datetime import datetime,timedelta
 from random import random
-
+from dateutil.relativedelta import relativedelta
+from urllib.parse import quote
 
 def crawl_page_detail(detail_url, session):
     header = {
@@ -17,19 +18,20 @@ def crawl_page_detail(detail_url, session):
     return soup
 def ptt_crawler(financial_dict,stock):
     # 設定爬取的起始日期（半年前的日期）
-    start_date = (datetime.now() - timedelta(days=180)).replace(hour=0, minute=0, second=0, microsecond=0)
+    start_date = (datetime.now() - relativedelta(months=6)) # 自動計算半年前的日期(from dateutil.relativedelta import relativedelta)
 
     # 根據字典裡的股票代號或股票名稱爬取相對應的討論版標題
     id = financial_dict['stock_id']
     name = financial_dict['stock_name']
     date_lst = [] # 爬取完的日期
-    title_lst = []
+    title_lst = [] # 爬取完的標題
 
     # 使用 Session 保持相同的 cookies
     session = requests.Session()
 
     # 設定起始頁面數字
     page_number = 1
+    stock = quote(name, safe='') # 將中文轉換為 URL 可接受的格式(from urllib.parse import quote)
     check = True
     while True:
         first_page_url = f"https://www.ptt.cc/bbs/Stock/search?page={page_number}&q={stock}"
@@ -54,9 +56,13 @@ def ptt_crawler(financial_dict,stock):
             end = date.split('/')
 
             # 判斷是否符合條件
-            if int(post_year) == int(start_date.strftime('%Y')) and int(end[0]) >= int(start_date.strftime('%m')):
+            if int(post_year) == start_date.year:
+                if int(end[0]) >= start_date.month:
+                    date_lst.append(date)
+                    title_lst.append(title.text.strip())  # 符合條件的標題存進list裡
+            elif int(post_year) == start_date.year+1:
                 date_lst.append(date)
-                title_lst.append(title.text.strip())  # 符合條件的標題存進list裡
+                title_lst.append(title.text.strip())
             else:
                 check = False
                 break

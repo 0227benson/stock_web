@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-from time import sleep
 from datetime import datetime,timedelta
+from time import sleep
 from random import random
 from dateutil.relativedelta import relativedelta
 from urllib.parse import quote
@@ -16,7 +16,7 @@ def crawl_page_detail(detail_url, session):
 
     # 處理詳細頁面的爬取邏輯
     return soup
-def ptt_crawler(financial_dict,stock):
+def crawler(financial_dict):
     # 設定爬取的起始日期（半年前的日期）
     start_date = (datetime.now() - relativedelta(months=6)) # 自動計算半年前的日期(from dateutil.relativedelta import relativedelta)
 
@@ -55,7 +55,7 @@ def ptt_crawler(financial_dict,stock):
                     post_year = meta_line.find('span', {'class': 'article-meta-value'}).text.split()[-1]
             end = date.split('/')
 
-            # 判斷是否符合條件
+                # 判斷是否符合條件
             if int(post_year) == start_date.year:
                 if int(end[0]) >= start_date.month:
                     date_lst.append(date)
@@ -72,9 +72,9 @@ def ptt_crawler(financial_dict,stock):
         page_number += 1
 
         # 避免爬取速度過快
-        sleep(random() * 2)
+        sleep(random())
 
     if not date_lst or not title_lst:
         print('此股票半年內無人討論')
-    else:
-        print(date_lst,title_lst,sep = '\n')
+    return title_lst,name,date_lst
+

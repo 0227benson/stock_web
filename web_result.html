@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票查詢</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+<body>
+    <h1>歡迎使用投資小助手</h1>
+    <label for="stockcode">輸入股票代碼：</label>
+    <form action="upload" method="POST" id="stockForm">
+        <input type="text" id="stockCode" name="stockCode" placeholder="輸入股票代碼">
+        <button type=submit value=Upload>查詢</button>
+    </form>
+    <p class="ps"><font face="monospace"><big>搜尋結果 :</big></font></p>
+    {% if display_info %}
+    <div id="result">
+        <h2>股票資訊</h2>
+        {% for key, value in display_info.items() %}
+            <p>{{ key }}: {{ value }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div id="result"></div>
+    <div>
+        <h2>財務資訊</h2>
+        {{ k_line_html | safe }}
+    </div>
+    <div>
+        <h2>每季EPS</h2>
+        <img src="{{ eps_img }}" alt="每季EPS圖表">
+    </div>
+    <div>
+        <h2>詞雲圖</h2>
+        <img src="data:image/png;base64,{{ wordcloud_obj }}" alt="wordcloud">
+    </div>
+    <div>
+        <h2>討論趨勢圖</h2>
+        <img src="{{ discu_number }}" alt="半年內討論趨勢圖">
+    </div>
+</body>
+</html>

@@ -4,10 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>股票查詢</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock_web.css') }}">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+        }
+
+        h1 {
+            background-color: #ffc0cb;
+            color: #333333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        label {
+            background-color: #ffc0cb;
+            color: #333333;
+            padding: 5px;
+        }
+
+        #stockForm {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #stockCode {
+            width: 100px;
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ffc0cb;
+            color: #333333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #fff5f7;
         }
 
         #result {
@@ -18,10 +62,10 @@
 </head>
 <body>
     <h1>歡迎使用投資小助手</h1>
-    <label for="stockcode">輸入股票代碼：</label>
     <form action="upload" method="POST" id="stockForm">
+        <label for="stockCode">輸入股票代碼：</label>
         <input type="text" id="stockCode" name="stockCode" placeholder="輸入股票代碼">
-        <button type=submit value=Upload>查詢</button>
+        <button type="submit" value="Upload">查詢</button>
     </form>
 </body>
 </html>

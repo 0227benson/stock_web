@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request
 import matplotlib
 from goodinfo import goodinfo
 from K_line import k_line
@@ -13,16 +13,15 @@ app = Flask(__name__)
 def index():
     return render_template('html/web.html')
 
-@app.route("/upload", methods=["GET", "POST"])
+@app.route("/upload", methods=["POST"])
 def uploaded_file():
-    if request.method == 'POST':
-        stock_code = request.form.get('stockCode')
-        financial_dict, display_info = goodinfo(stock_code)
-        k_line_html = k_line(financial_dict)
-        eps_img = EPS(financial_dict)
-        title_lst,name,date_lst= crawler(financial_dict)
-        wordcloud_obj = cloud_img(financial_dict, title_lst)
-        discu_number = discu_num(date_lst,name)
+    stock_code = request.form.get('stockCode')
+    financial_dict, display_info = goodinfo(stock_code)
+    k_line_html = k_line(financial_dict)
+    eps_img = EPS(financial_dict)
+    title_lst,name,date_lst= crawler(financial_dict)
+    wordcloud_obj = cloud_img(financial_dict, title_lst)
+    discu_number = discu_num(date_lst,name)
 
         
 

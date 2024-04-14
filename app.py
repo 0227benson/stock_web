@@ -9,7 +9,7 @@ from discu_num import discu_num
 matplotlib.use('Agg')  # 使用 Agg 后端
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
     return render_template('html/web.html')
 
